@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Costa Rica · May 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --jungle:      #1a3a2a;
+  --jungle-mid:  #2d5c44;
+  --jungle-lt:   #3d7a5a;
+  --palm:        #4a9e6e;
+  --leaf:        #72c495;
+  --sand:        #f5ede0;
+  --sand-d:      #e8d9c5;
+  --warm:        #f4b96a;
+  --cream:       #fdf8f2;
+  --txt:         #1a2218;
+  --txt-mid:     #3d5246;
+  --txt-lt:      #7a9a85;
+  --danger:      #c0392b;
+  --warn:        #e67e22;
+  --shadow:      0 2px 16px rgba(26,58,42,.09);
+  --shadow-lg:   0 8px 40px rgba(26,58,42,.16);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* SAVE FLASH */
+#saveBadge{
+  position:fixed;top:14px;left:50%;transform:translateX(-50%);
+  background:var(--jungle);color:#fff;
+  font-size:.68rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
+  padding:5px 14px;border-radius:20px;
+  opacity:0;transition:opacity .3s;z-index:9999;pointer-events:none;
+  white-space:nowrap;
+}
+#saveBadge.on{opacity:1}
+
+/* HEADER */
+.hdr{
+  background:var(--jungle);color:#fff;
+  padding:20px 34px 16px;
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  box-shadow:0 2px 24px rgba(0,0,0,.28);
+}
+.hdr-brand h1{
+  font-family:'Playfair Display',serif;font-size:1.42rem;font-weight:700;
+  line-height:1.1;letter-spacing:-.01em;
+}
+.hdr-brand h1 em{color:var(--warm);font-style:normal}
+.hdr-brand p{font-size:.69rem;color:var(--leaf);margin-top:3px;letter-spacing:.06em;text-transform:uppercase}
+.hdr-btns{display:flex;gap:7px;flex-wrap:wrap}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 14px;border-radius:8px;border:none;
+  font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.btn-green{background:var(--palm);color:#fff}
+.btn-green:hover{background:var(--jungle-lt);transform:translateY(-1px)}
+.btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)}
+.btn-ghost:hover{background:rgba(255,255,255,.2)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-danger:hover{background:#a93226}
+.btn-sand{background:var(--sand);color:var(--txt-mid);border:1px solid var(--sand-d)}
+.btn-sand:hover{background:var(--sand-d)}
+.btn-sm{padding:5px 9px;font-size:.72rem;border-radius:6px}
+.btn-icon{padding:4px 7px;font-size:.82rem}
+
+/* FLIGHTS */
+.flights{
+  background:linear-gradient(100deg,var(--jungle-mid),var(--jungle));
+  color:#fff;padding:11px 34px;
+  display:flex;gap:32px;align-items:center;flex-wrap:wrap;
+}
+.fl{display:flex;align-items:center;gap:10px;font-size:.78rem}
+.fl-ico{font-size:1.1rem}
+.fl strong{display:block;font-size:.84rem}
+.fl span{color:var(--leaf);font-size:.71rem}
+.fl-sep{width:1px;height:26px;background:rgba(255,255,255,.18);flex-shrink:0}
+
+/* MAIN */
+.main{max-width:1060px;margin:0 auto;padding:26px 20px 80px}
+
+/* STATS */
+.stats{
+  background:#fff;border-radius:14px;padding:14px 20px;
+  margin-bottom:20px;box-shadow:var(--shadow);
+  display:flex;gap:24px;align-items:center;flex-wrap:wrap;justify-content:space-between;
+}
+.stat .v{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--jungle);display:block;line-height:1}
+.stat .l{font-size:.65rem;color:var(--txt-lt);text-transform:uppercase;letter-spacing:.09em;margin-top:2px}
+.stat-sep{width:1px;height:30px;background:var(--sand-d);flex-shrink:0}
+
+/* DAYS */
+.days{display:flex;flex-direction:column;gap:16px}
+
+.day{background:#fff;border-radius:16px;box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .18s}
+.day:hover{box-shadow:var(--shadow-lg)}
+
+.day-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 18px;background:var(--jungle);color:#fff;
+  cursor:pointer;user-select:none;gap:10px;transition:background .14s;
+}
+.day-hdr:hover{background:var(--jungle-mid)}
+.day-hl{display:flex;align-items:center;gap:11px}
+.day-pill{
+  font-family:'DM Mono',monospace;font-size:.66rem;font-weight:500;
+  background:rgba(255,255,255,.14);border-radius:6px;padding:3px 8px;
+  letter-spacing:.05em;white-space:nowrap;flex-shrink:0;
+}
+.day-ti h3{font-family:'Playfair Display',serif;font-size:.98rem;font-weight:600;line-height:1.2}
+.day-ti p{font-size:.7rem;color:var(--leaf);margin-top:2px}
+.day-hr{display:flex;align-items:center;gap:6px}
+.day-cnt{font-size:.68rem;background:rgba(255,255,255,.15);border-radius:20px;padding:2px 8px;font-weight:500}
+.arrow{font-size:.95rem;transition:transform .22s;flex-shrink:0}
+.day.closed .arrow{transform:rotate(-90deg)}
+
+/* BODY */
+.day-body{padding:0 18px 12px}
+.day.closed .day-body{display:none}
+
+/* EVENTS */
+.ev-list{padding-top:8px}
+.ev{
+  display:flex;gap:11px;align-items:flex-start;
+  padding:8px 3px;border-bottom:1px dashed var(--sand-d);position:relative;
+}
+.ev:last-child{border-bottom:none}
+.ev.drag-over{border-top:2px solid var(--palm);margin-top:-1px}
+.ev.dragging{opacity:.38}
+
+.dh{
+  color:var(--txt-lt);cursor:grab;font-size:.95rem;padding-top:4px;
+  flex-shrink:0;opacity:.4;transition:opacity .13s;user-select:none;
+}
+.dh:hover{opacity:1}
+.dh:active{cursor:grabbing}
+
+/* TIME */
+.ev-tw{width:70px;flex-shrink:0}
+.ev-time{
+  font-family:'DM Mono',monospace;font-size:.73rem;font-weight:500;
+  color:var(--txt-mid);cursor:pointer;
+  padding:2px 5px;border-radius:4px;border:1px solid transparent;
+  display:inline-block;line-height:1.45;transition:all .12s;white-space:nowrap;
+}
+.ev-time:hover{border-color:var(--palm);background:#f0faf4;color:var(--jungle)}
+.ev-time-inp{
+  font-family:'DM Mono',monospace;font-size:.73rem;width:68px;
+  padding:2px 4px;border:1.5px solid var(--palm);border-radius:4px;
+  outline:none;color:var(--jungle);background:#fff;
+}
+
+/* CONTENT */
+.ev-body{flex:1;min-width:0}
+.badge{
+  display:inline-block;font-size:.61rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.07em;
+  padding:2px 6px;border-radius:4px;margin-bottom:3px;
+}
+.b-hotel{background:#e8f4ea;color:#2d6b44}
+.b-food{background:#fef3e2;color:#b7650a}
+.b-activity{background:#e8f0fb;color:#2a5daa}
+.b-transport{background:#f3eafe;color:#6b3db7}
+.b-flight{background:#fdeaea;color:#a02020}
+.b-coffee{background:#fdf0e8;color:#8c4a1e}
+.b-note{background:#f5f5f5;color:#666}
+
+.ev-name{
+  font-weight:600;font-size:.88rem;color:var(--txt);
+  cursor:pointer;padding:1px 3px;border-radius:4px;
+  border:1px solid transparent;transition:all .12s;display:inline;line-height:1.4;
+}
+.ev-name:hover{border-color:var(--palm);background:#f0faf4}
+.ev-name-inp{
+  font-size:.88rem;font-weight:600;width:100%;
+  padding:2px 4px;border:1.5px solid var(--palm);border-radius:4px;
+  outline:none;font-family:'DM Sans',sans-serif;color:var(--txt);
+}
+.ev-notes{
+  font-size:.74rem;color:var(--txt-mid);margin-top:3px;line-height:1.55;
+  cursor:pointer;padding:2px 3px;border-radius:4px;
+  border:1px solid transparent;transition:all .12s;display:block;
+}
+.ev-notes:hover{border-color:var(--sand-d);background:var(--sand)}
+.ev-notes.ph{color:var(--txt-lt);font-style:italic;opacity:.6}
+.ev-notes-ta{
+  font-size:.74rem;width:100%;padding:4px 6px;
+  border:1.5px solid var(--palm);border-radius:4px;
+  outline:none;font-family:'DM Sans',sans-serif;color:var(--txt-mid);
+  resize:vertical;min-height:44px;
+}
+.ev-alert{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:.66rem;background:#fff4e6;color:var(--warn);
+  border-radius:4px;padding:2px 7px;margin-top:4px;font-weight:500;
+}
+
+/* ACTIONS */
+.ev-acts{
+  display:flex;gap:3px;align-items:center;flex-shrink:0;
+  opacity:0;transition:opacity .13s;
+}
+.ev:hover .ev-acts{opacity:1}
+
+/* ADD ROW */
+.add-row{
+  display:flex;gap:6px;align-items:center;
+  padding:8px 0 2px;flex-wrap:wrap;
+}
+.add-row input,.add-row select{
+  font-family:'DM Sans',sans-serif;font-size:.78rem;
+  padding:6px 9px;border:1.5px solid var(--sand-d);border-radius:7px;
+  outline:none;color:var(--txt);background:var(--sand);transition:border-color .13s;
+}
+.add-row input:focus,.add-row select:focus{border-color:var(--palm);background:#fff}
+.an{flex:1;min-width:140px}
+.at{width:82px}
+.atp{width:112px}
+
+/* ADD DAY BTN */
+.add-day-wrap{margin-top:24px;display:flex;justify-content:center}
+.add-day-btn{
+  border:2px dashed var(--jungle-lt);background:transparent;color:var(--jungle);
+  padding:12px 28px;border-radius:12px;font-size:.84rem;font-weight:600;cursor:pointer;
+  transition:all .16s;display:flex;align-items:center;gap:8px;font-family:'DM Sans',sans-serif;
+}
+.add-day-btn:hover{background:var(--sand);border-color:var(--palm);color:var(--palm)}
+
+/* RESET */
+.reset-bar{
+  margin-top:28px;padding:16px 20px;background:#fff;border-radius:12px;
+  box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;
+  gap:14px;flex-wrap:wrap;
+}
+.reset-bar p{font-size:.76rem;color:var(--txt-mid)}
+.reset-bar strong{display:block;font-size:.84rem;color:var(--txt);margin-bottom:2px}
+
+/* EMPTY */
+.empty{text-align:center;padding:20px 0 6px;color:var(--txt-lt);font-size:.8rem;font-style:italic}
+
+/* MODAL */
+.overlay{
+  position:fixed;inset:0;background:rgba(8,24,16,.58);
+  backdrop-filter:blur(4px);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  animation:faIn .17s;
+}
+@keyframes faIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:#fff;border-radius:18px;padding:28px;
+  max-width:490px;width:100%;box-shadow:0 20px 80px rgba(0,0,0,.26);
+  animation:slUp .21s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes slUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal h2{font-family:'Playfair Display',serif;font-size:1.24rem;color:var(--jungle);margin-bottom:16px}
+.fg{margin-bottom:13px}
+.fg label{display:block;font-size:.7rem;font-weight:600;color:var(--txt-mid);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.fg input,.fg select,.fg textarea{
+  width:100%;padding:8px 11px;border:1.5px solid var(--sand-d);border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:.86rem;color:var(--txt);
+  outline:none;background:var(--cream);transition:border-color .13s;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--palm);background:#fff}
+.fg textarea{resize:vertical;min-height:64px}
+.fg-row{display:flex;gap:10px}
+.fg-row .fg{flex:1}
+.m-acts{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.m-ok{background:var(--palm);color:#fff;padding:9px 20px;border-radius:8px;border:none;font-size:.84rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .13s}
+.m-ok:hover{background:var(--jungle-lt)}
+.m-cancel{background:var(--sand);color:var(--txt-mid);padding:9px 16px;border-radius:8px;border:none;font-size:.84rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .13s}
+.m-cancel:hover{background:var(--sand-d)}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--jungle);color:#fff;
+  padding:10px 16px;border-radius:9px;font-size:.8rem;font-weight:500;
+  z-index:500;box-shadow:0 6px 28px rgba(0,0,0,.2);
+  display:flex;align-items:center;gap:7px;
+  animation:tIn .19s cubic-bezier(.34,1.56,.64,1);max-width:290px;
+}
+@keyframes tIn{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast.out{animation:tOut .19s forwards}
+@keyframes tOut{to{transform:translateY(16px);opacity:0}}
+
+/* PRINT */
+@media print{
+  .hdr-btns,.day-hr .btn,.ev-acts,.add-row,.add-day-wrap,.overlay,.toast,.reset-bar,#saveBadge{display:none!important}
+  .day.closed .day-body{display:block!important}
+  body{background:#fff}
+}
+
+/* MOBILE */
+@media(max-width:560px){
+  .hdr{padding:13px 14px;flex-direction:column;align-items:flex-start}
+  .flights{padding:9px 14px;gap:12px}
+  .main{padding:16px 11px 60px}
+  .day-hdr{padding:11px 13px}
+  .day-body{padding:0 11px 9px}
+  .stats{gap:12px}
+}
+</style>
+</head>
+<body>
+
+<div id="saveBadge">✓ Saved to browser</div>
+
+<header class="hdr">
+  <div class="hdr-brand">
+    <h1>🌴 <em>Costa Rica</em> — Pura Vida</h1>
+    <p>May 17–24, 2026 · Eric &amp; Helen · All changes auto-saved locally</p>
+  </div>
+  <div class="hdr-btns">
+    <button class="btn btn-ghost" onclick="expandAll()">⬇ Expand</button>
+    <button class="btn btn-ghost" onclick="collapseAll()">⬆ Collapse</button>
+    <button class="btn btn-green" onclick="openAddDay()">＋ Day</button>
+    <button class="btn btn-ghost" onclick="doExport()">💾 Export</button>
+    <button class="btn btn-ghost" onclick="triggerImport()">📂 Import</button>
+    <button class="btn btn-ghost" onclick="doPrint()">🖨 Print</button>
+  </div>
+</header>
+
+<div class="flights">
+  <div class="fl">
+    <span class="fl-ico">✈️</span>
+    <div><strong>NK335 · FLL → SJO</strong><span>May 17 · Departs 10:55 AM · Arrives 11:45 AM</span></div>
+  </div>
+  <div class="fl-sep"></div>
+  <div class="fl">
+    <span class="fl-ico">✈️</span>
+    <div><strong>NK338 · SJO → FLL</strong><span>May 24 · Departs 1:00 PM · Arrives 6:10 PM</span></div>
+  </div>
+</div>
+
+<main class="main">
+  <div class="stats">
+    <div class="stat"><span class="v" id="sDays">0</span><span class="l">Days</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat"><span class="v" id="sEvs">0</span><span class="l">Events</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat"><span class="v" id="sFood">0</span><span class="l">Restaurants</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat"><span class="v" id="sActs">0</span><span class="l">Activities</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat"><span class="v">3</span><span class="l">Regions</span></div>
+  </div>
+
+  <div class="days" id="daysEl"></div>
+
+  <div class="add-day-wrap">
+    <button class="add-day-btn" onclick="openAddDay()">＋ Add Another Day</button>
+  </div>
+
+  <div class="reset-bar">
+    <div>
+      <strong>Reset to Default Itinerary</strong>
+      <p>Clears all changes and restores the original pre-loaded itinerary.</p>
+    </div>
+    <button class="btn btn-danger btn-sm" onclick="resetToDefault()">🔄 Reset</button>
+  </div>
+</main>
+
+<div class="overlay" id="overlay" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="mBox"></div>
+</div>
+
+<input type="file" id="fileIn" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<script>
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+const LS_KEY = 'cr_itinerary_v3';
+
+const TYPE_ORDER = ['activity','food','coffee','hotel','transport','flight','note'];
+const TYPE_INFO  = {
+  hotel:     {label:'Hotel',      emoji:'🏨', cls:'b-hotel'},
+  food:      {label:'Restaurant', emoji:'🍽', cls:'b-food'},
+  activity:  {label:'Activity',   emoji:'🏃', cls:'b-activity'},
+  transport: {label:'Transport',  emoji:'🚗', cls:'b-transport'},
+  flight:    {label:'Flight',     emoji:'✈️', cls:'b-flight'},
+  coffee:    {label:'Café',       emoji:'☕', cls:'b-coffee'},
+  note:      {label:'Note',       emoji:'📝', cls:'b-note'},
+};
+
+// ─── DEFAULT DATA ─────────────────────────────────────────────────────────────
+const DEFAULT_DATA = [
+  {id:'d1',date:'Sun, May 17',label:'Day 1',title:'Arrival · La Fortuna',subtitle:'Pick up car · Drive north · Check in',events:[
+    {id:'e1', time:'10:55 AM',type:'flight',    name:'NK335 departs Fort Lauderdale (FLL)',      notes:'Arrive SJO 11:45 AM. Spirit flight — pack light.',alert:''},
+    {id:'e2', time:'12:30 PM',type:'transport', name:'Pick up rental car at SJO',                notes:'Budget ~90 min for baggage + rental. Adobe Rent A Car or similar. Full-service gas stations — no tipping.',alert:''},
+    {id:'e3', time:'1:30 PM', type:'transport', name:'Drive SJO → La Fortuna (~2.5 hrs)',        notes:'Scenic drive through the Central Valley. DO NOT take Route 713 — dangerous mountain road.',alert:'⚠️ Avoid Route 713 even if GPS suggests it'},
+    {id:'e4', time:'4:30 PM', type:'activity',  name:'La Fortuna Waterfall',                     notes:'⭐ 4.6 · 585 steps down and back up! Open 7AM–5PM. Bring water shoes — slippery rocks at swim area.',alert:'Closes at 5 PM — arrive by 4:00 PM'},
+    {id:'e5', time:'6:30 PM', type:'hotel',     name:'Check in: La Fortuna The Hut',             notes:'Provincia de Alajuela, Costa Rica. Freshen up and grab dinner in La Fortuna town.',alert:''},
+    {id:'e6', time:'7:30 PM', type:'food',      name:'Dinner in La Fortuna town',                notes:'Try Don Rufino or any local soda. Soda Rodríguez is CLOSED Sundays.',alert:''},
+  ]},
+  {id:'d2',date:'Mon, May 18',label:'Day 2',title:'Volcano & Flavors',subtitle:'La Fortuna · Arenal National Park',events:[
+    {id:'e7', time:'8:00 AM', type:'coffee',    name:'Brunch: The Village Coffee Shop',          notes:'⭐ 4.9 · Fruit-fermented coffees, smoothies, pastries. Hummingbird garden. Open Mon–Sat 7AM–5PM.',alert:'Closed Sundays — today is Monday ✓'},
+    {id:'e8', time:'10:00 AM',type:'activity',  name:'Arenal Volcano National Park',             notes:'⭐ 4.6 · Open 8AM–4PM · $17 entry. Multiple trails (easy to 9km). Best views early before clouds build. Spot toucans and coatis.',alert:''},
+    {id:'e9', time:'3:00 PM', type:'coffee',    name:'Vita Café (best coffee stop)',             notes:'⭐ 4.9 · Right next to the waterfall parking. Cold brew and lavender lattes are legendary. Many say best coffee in all of Costa Rica.',alert:''},
+    {id:'e10',time:'5:00 PM', type:'activity',  name:'Baldi Hot Springs (optional)',             notes:'Natural thermal pools fed by Arenal. Multiple pools, swim-up bar. ~$40/person. Great after a hiking day.',alert:''},
+    {id:'e11',time:'7:00 PM', type:'food',      name:'Dinner: Soda & Restaurante Rodríguez',    notes:'⭐ 4.5 · Treehouse-style restaurant, totally unique. Order the House Bowl. Staff may point out a sloth in the trees!',alert:'Closed Sundays — today is Monday ✓'},
+  ]},
+  {id:'d3',date:'Tue, May 19',label:'Day 3',title:'Drive Day · Manuel Antonio',subtitle:'La Fortuna → Tarcoles → Quepos',events:[
+    {id:'e12',time:'8:00 AM', type:'hotel',     name:'Checkout: La Fortuna The Hut',             notes:'Early start recommended. Pack swimwear for the beach tonight!',alert:''},
+    {id:'e13',time:'8:30 AM', type:'transport', name:'Drive: La Fortuna → Tarcoles (~2 hrs)',    notes:'DO NOT take Route 713. Take the main highway via San Ramón.',alert:'⚠️ Avoid Rte 713 — stick to San Ramón highway'},
+    {id:'e14',time:'11:00 AM',type:'activity',  name:'Stop: Tarcoles Crocodile Bridge',          notes:'🐊 FREE stop! Massive American crocs visible below the bridge. Fresh fruit smoothies at stands on site. Tip car watcher $1.',alert:''},
+    {id:'e15',time:'11:45 AM',type:'transport', name:'Drive: Tarcoles → Manuel Antonio (~1.5 hrs)', notes:'Beautiful coastal highway. Watch for roadside fruit stands with fresh coconuts.',alert:''},
+    {id:'e16',time:'2:30 PM', type:'hotel',     name:'Check in: Shana by the Beach',             notes:'⭐ 4.5 · 800m noroeste de Plaza Vista, Manuel Antonio. Stunning pool with Pacific views. Road to hotel is steep and bumpy — take it slow.',alert:''},
+    {id:'e17',time:'4:00 PM', type:'activity',  name:'Playa Biesanz (hidden beach)',             notes:'"Secret" beach via 15-min forested walk. Sheltered cove, safe swimming, far fewer crowds than the main park beaches.',alert:''},
+    {id:'e18',time:'7:00 PM', type:'food',      name:'Dinner: Café Milagro',                     notes:'⭐ 4.6 · Manuel Antonio institution since 1994. Live music evenings, lush outdoor patio. Try the coffee flan!',alert:''},
+  ]},
+  {id:'d4',date:'Wed, May 20',label:'Day 4',title:'El Avión + National Park',subtitle:'Manuel Antonio · Park Day',events:[
+    {id:'e19',time:'9:00 AM', type:'food',      name:'Brunch: El Avión',                         notes:'⭐ 4.4 · Dine inside a converted WWII C-123 cargo plane with ocean views. Kids can sit in the cockpit!',alert:''},
+    {id:'e20',time:'11:00 AM',type:'activity',  name:'Manuel Antonio National Park',             notes:'⭐ 4.5 · CLOSED TUESDAYS (today = Wednesday ✓). Book tickets at sinac.go.cr — $18/person, passport # needed. Hire a naturalist guide to spot sloths. No food inside. Open 7AM–3PM.',alert:'Book tickets online BEFORE the trip!'},
+    {id:'e21',time:'3:30 PM', type:'activity',  name:'Playa Espadilla (public beach)',           notes:'Public beach outside park entrance. Boogie boarding, surfing, coconut vendors, sunset watching.',alert:''},
+    {id:'e22',time:'7:00 PM', type:'food',      name:'Dinner: Agua Azul',                        notes:'⭐ 4.6 · Panoramic Pacific views. Legendary seafood pasta with rosé sauce. Monkeys sometimes stop by. Reserve for sunset seating.',alert:'Reservation recommended for sunset views'},
+  ]},
+  {id:'d5',date:'Thu, May 21',label:'Day 5',title:'Mangroves + Adventure',subtitle:'Manuel Antonio · Full Adventure Day',events:[
+    {id:'e23',time:'8:00 AM', type:'activity',  name:'Isla Damas Mangrove Boat Tour',            notes:'⭐ 4.5 · ~$40/person. Book via WhatsApp: +506 8503 9150. Monkeys climb on the boat! Sloths, crocs, iguanas all in one morning.',alert:'Book ahead via WhatsApp'},
+    {id:'e24',time:'12:30 PM',type:'food',      name:'Lunch: Soda Sanchez, Quepos',              notes:'Best local casado in Quepos. Rice, beans, protein, sweet plantains ~$8 USD. One block from the bus station.',alert:''},
+    {id:'e25',time:'2:00 PM', type:'activity',  name:'Nauyaca Waterfalls (optional day trip)',   notes:'⭐ 4.7 · ~45 min south. Take the 4x4 jeep transport up $15. Stunning twin waterfalls + natural swimming pools. Open 7AM–3PM.',alert:'Optional — skip if tired from morning tour'},
+    {id:'e26',time:'5:30 PM', type:'activity',  name:'Shana pool / spa / resort time',           notes:'Pool overlooks the Pacific — perfect sunset spot. Hotel spa does couples massages — ask about deals.',alert:''},
+    {id:'e27',time:'7:00 PM', type:'food',      name:'Dinner: El Lagarto',                       notes:'⭐ 4.5 · Wood-fire grill. Best sunset dinner of the trip. Try the grilled lobster, mixed meat platter, or roasted whole garlic heads as a starter.',alert:'Reservation strongly recommended!'},
+  ]},
+  {id:'d6',date:'Fri, May 22',label:'Day 6',title:'Drive to San José',subtitle:'Checkout · Mountain drive · Capital city',events:[
+    {id:'e28',time:'9:00 AM', type:'food',      name:'Brunch: Café Milagro (final Pacific meal)',notes:'Banana pancakes and great coffee. Last meal on the Pacific coast.',alert:''},
+    {id:'e29',time:'10:30 AM',type:'hotel',     name:'Checkout: Shana by the Beach',             notes:'Check safe. Steep driveway — slow on the way out.',alert:''},
+    {id:'e30',time:'11:00 AM',type:'transport', name:'Drive: Manuel Antonio → San José (~3 hrs)',notes:'Beautiful mountain drive. Stop for roadside tropical fruit if you see a stand.',alert:''},
+    {id:'e31',time:'2:30 PM', type:'hotel',     name:'Check in: Hotel Presidente, San José',     notes:'⭐ 4.4 · Avenida Central. Walkable to Jade Museum, National Theater, Central Market. Rooftop restaurant with city views. Valet parking available.',alert:''},
+    {id:'e32',time:'4:00 PM', type:'activity',  name:'Explore Barrio Amón (walking)',            notes:'Historic neighborhood: Victorian mansions, street art, cozy cafés. 10-min walk from hotel.',alert:''},
+    {id:'e33',time:'7:00 PM', type:'food',      name:'Dinner: Hotel Presidente Rooftop',         notes:'Open-air rooftop with San José city views. Great cocktails, convenient, no driving needed.',alert:''},
+  ]},
+  {id:'d7',date:'Sat, May 23',label:'Day 7',title:'San José Culture Day',subtitle:'Museums · Markets · City walks',events:[
+    {id:'e34',time:'9:00 AM', type:'food',      name:'Breakfast: San José Central Market',      notes:'⭐ 4.4 · Vibrant maze of sodas, fresh fruit, coffee stalls. Best casado breakfast for $6–8. Great souvenirs: coffee beans, spices. Open Mon–Sat.',alert:'CLOSED Sundays — today is Saturday ✓'},
+    {id:'e35',time:'11:00 AM',type:'activity',  name:'Museo del Jade y la Cultura Precolombina',notes:'⭐ 4.7 · Largest jade collection in the Americas — 7,000+ pieces. $16 entry. Plan 2 hrs. English audio guides available.',alert:''},
+    {id:'e36',time:'2:00 PM', type:'activity',  name:'National Theater of Costa Rica',          notes:'⭐ 4.8 · Actors-in-costume guided tour is spectacular. $7–10 entry. Open Tue–Sun 9AM–4PM. See it lit up at night!',alert:''},
+    {id:'e37',time:'4:00 PM', type:'activity',  name:'Avenida Central + souvenir shopping',     notes:'Pedestrian mall. Local craft shops, Costa Rican coffee, people-watching. Last chance for souvenirs!',alert:''},
+    {id:'e38',time:'7:30 PM', type:'food',      name:'Farewell Dinner 🎉',                       notes:'Celebrate Pura Vida! Try La Esquina de Buenos Aires (Argentinian steakhouse) or stay at the Presidente rooftop.',alert:''},
+  ]},
+  {id:'d8',date:'Sun, May 24',label:'Day 8',title:'Fly Home',subtitle:'San José → Fort Lauderdale',events:[
+    {id:'e39',time:'8:00 AM', type:'food',      name:'Breakfast at hotel',                       notes:'Hotel Presidente breakfast buffet. Fuel up before the journey home.',alert:''},
+    {id:'e40',time:'9:30 AM', type:'transport', name:'Drive to SJO + return rental car',         notes:'Airport is in Alajuela, ~25 min from downtown. Return with full tank. Confirm drop-off the night before.',alert:''},
+    {id:'e41',time:'10:00 AM',type:'transport', name:'SJO Airport check-in & security',          notes:'Arrive at least 2.5–3 hrs before international departure. NK338 departs 1:00 PM.',alert:'Arrive airport by 10 AM at the latest'},
+    {id:'e42',time:'1:00 PM', type:'flight',    name:'NK338 departs San José (SJO)',             notes:'Arrives Fort Lauderdale (FLL) 6:10 PM. Pura Vida! 🌴',alert:''},
+  ]},
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let data = [];
+let saveTimeout = null;
+let dragDi = null, dragEi = null;
+
+// ─── PERSISTENCE ─────────────────────────────────────────────────────────────
+function tryLoad() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (Array.isArray(p) && p.length) { data = p; return true; }
+    }
+  } catch(e) {}
+  return false;
+}
+
+function save() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+    const el = document.getElementById('saveBadge');
+    el.classList.add('on');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('on'), 1600);
+  } catch(e) {
+    if (e.name === 'QuotaExceededError') toast('⚠️ Browser storage full — try Export first');
+  }
+}
+
+function scheduleSave() {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(save, 350);
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escA(s) { return String(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function uid()  { return '_' + Date.now() + Math.random().toString(36).slice(2,6); }
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function render() {
+  const container = document.getElementById('daysEl');
+  container.innerHTML = '';
+  data.forEach((day, di) => {
+    const div = document.createElement('div');
+    div.className = 'day';
+    div.id = 'day-' + day.id;
+    div.innerHTML = buildDayHTML(day, di);
+    container.appendChild(div);
+    wireAddRow(day.id, di);
+  });
+  updateStats();
+  bindDrag();
+}
+
+function buildDayHTML(day, di) {
+  const rows = day.events.length === 0
+    ? '<div class="empty">No events yet — use the row below to add one!</div>'
+    : day.events.map((ev, ei) => buildEvHTML(ev, di, ei)).join('');
+
+  return `
+    <div class="day-hdr" onclick="toggleDay('day-${day.id}')">
+      <div class="day-hl">
+        <span class="day-pill">${esc(day.label)} · ${esc(day.date)}</span>
+        <div class="day-ti">
+          <h3>${esc(day.title)}</h3>
+          <p>${esc(day.subtitle)}</p>
+        </div>
+      </div>
+      <div class="day-hr">
+        <span class="day-cnt">${day.events.length} events</span>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditDay(${di})">✏️ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();delDay(${di})">🗑</button>
+        <span class="arrow">▾</span>
+      </div>
+    </div>
+    <div class="day-body">
+      <div class="ev-list" id="evl-${day.id}">${rows}</div>
+      <div class="add-row" id="ar-${day.id}">
+        <input class="an" type="text" placeholder="Add event or activity..." id="an-${day.id}">
+        <input class="at" type="text" placeholder="9:00 AM" id="at-${day.id}">
+        <select class="atp" id="atp-${day.id}">
+          <option value="activity">🏃 Activity</option>
+          <option value="food">🍽 Restaurant</option>
+          <option value="coffee">☕ Café</option>
+          <option value="hotel">🏨 Hotel</option>
+          <option value="transport">🚗 Transport</option>
+          <option value="flight">✈️ Flight</option>
+          <option value="note">📝 Note</option>
+        </select>
+        <button class="btn btn-green btn-sm" onclick="addEvent(${di})">＋ Add</button>
+      </div>
+    </div>`;
+}
+
+function buildEvHTML(ev, di, ei) {
+  const info = TYPE_INFO[ev.type] || TYPE_INFO.note;
+  return `
+    <div class="ev" draggable="true" data-di="${di}" data-ei="${ei}" id="ev-${ev.id}">
+      <span class="dh" title="Drag to reorder">⠿</span>
+      <div class="ev-tw">
+        <span class="ev-time" onclick="editTime(this,${di},${ei})">${esc(ev.time)||'—'}</span>
+      </div>
+      <div class="ev-body">
+        <span class="badge ${info.cls}">${info.emoji} ${info.label}</span>
+        <div><span class="ev-name" onclick="editName(this,${di},${ei})">${esc(ev.name)}</span></div>
+        ${ev.notes
+          ? `<span class="ev-notes" onclick="editNotes(this,${di},${ei})">${esc(ev.notes)}</span>`
+          : `<span class="ev-notes ph" onclick="editNotes(this,${di},${ei})">Add notes...</span>`}
+        ${ev.alert ? `<div class="ev-alert">⚠️ ${esc(ev.alert)}</div>` : ''}
+      </div>
+      <div class="ev-acts">
+        <button class="btn btn-sand btn-sm btn-icon" title="Change type" onclick="cycleType(${di},${ei})">🔄</button>
+        <button class="btn btn-sand btn-sm btn-icon" title="Edit alert" onclick="editAlertModal(${di},${ei})">🔔</button>
+        <button class="btn btn-sand btn-sm btn-icon" title="Move up"    onclick="moveEv(${di},${ei},-1)">↑</button>
+        <button class="btn btn-sand btn-sm btn-icon" title="Move down"  onclick="moveEv(${di},${ei},1)">↓</button>
+        <button class="btn btn-danger btn-sm btn-icon" title="Delete"   onclick="delEv(${di},${ei})">✕</button>
+      </div>
+    </div>`;
+}
+
+function reRenderDay(di) {
+  const day  = data[di];
+  const card = document.getElementById('day-' + day.id);
+  if (!card) { render(); return; }
+  const closed = card.classList.contains('closed');
+  card.innerHTML = buildDayHTML(day, di);
+  if (closed) card.classList.add('closed');
+  wireAddRow(day.id, di);
+  updateStats();
+  bindDrag();
+  scheduleSave();
+}
+
+function wireAddRow(dayId, di) {
+  const inp = document.getElementById('an-' + dayId);
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') addEvent(di); });
+}
+
+// ─── TOGGLE ───────────────────────────────────────────────────────────────────
+function toggleDay(id) { document.getElementById(id).classList.toggle('closed'); }
+function expandAll()   { document.querySelectorAll('.day').forEach(d => d.classList.remove('closed')); }
+function collapseAll() { document.querySelectorAll('.day').forEach(d => d.classList.add('closed')); }
+
+// ─── INLINE EDIT ─────────────────────────────────────────────────────────────
+function editTime(el, di, ei) {
+  const inp = document.createElement('input');
+  inp.type='text'; inp.className='ev-time-inp';
+  inp.value = data[di].events[ei].time;
+  el.replaceWith(inp); inp.focus(); inp.select();
+  const done = () => { data[di].events[ei].time = inp.value; reRenderDay(di); };
+  inp.addEventListener('blur', done);
+  inp.addEventListener('keydown', e => { if(e.key==='Enter') inp.blur(); if(e.key==='Escape') reRenderDay(di); });
+}
+
+function editName(el, di, ei) {
+  const inp = document.createElement('input');
+  inp.type='text'; inp.className='ev-name-inp';
+  inp.value = data[di].events[ei].name;
+  el.replaceWith(inp); inp.focus(); inp.select();
+  const done = () => { if(inp.value.trim()) data[di].events[ei].name = inp.value.trim(); reRenderDay(di); };
+  inp.addEventListener('blur', done);
+  inp.addEventListener('keydown', e => { if(e.key==='Enter') inp.blur(); if(e.key==='Escape') reRenderDay(di); });
+}
+
+function editNotes(el, di, ei) {
+  const ta = document.createElement('textarea');
+  ta.className='ev-notes-ta';
+  ta.value = data[di].events[ei].notes || '';
+  el.replaceWith(ta); ta.focus();
+  const done = () => { data[di].events[ei].notes = ta.value; reRenderDay(di); };
+  ta.addEventListener('blur', done);
+  ta.addEventListener('keydown', e => { if(e.key==='Escape') ta.blur(); });
+}
+
+// ─── EVENT OPERATIONS ────────────────────────────────────────────────────────
+function cycleType(di, ei) {
+  const cur = data[di].events[ei].type;
+  const i   = TYPE_ORDER.indexOf(cur);
+  data[di].events[ei].type = TYPE_ORDER[(i+1) % TYPE_ORDER.length];
+  reRenderDay(di);
+}
+
+function editAlertModal(di, ei) {
+  const cur = data[di].events[ei].alert || '';
+  showModal(`
+    <h2>🔔 Alert / Warning</h2>
+    <div class="fg">
+      <label>Alert text (leave blank to remove)</label>
+      <input id="m-alert" value="${escA(cur)}" placeholder="e.g. Book tickets in advance!">
+    </div>
+    <div class="m-acts">
+      <button class="m-cancel" onclick="closeModal()">Cancel</button>
+      <button class="m-ok" onclick="saveAlertVal(${di},${ei})">Save</button>
+    </div>`);
+}
+function saveAlertVal(di, ei) {
+  data[di].events[ei].alert = document.getElementById('m-alert').value.trim();
+  closeModal(); reRenderDay(di); toast('🔔 Alert updated');
+}
+
+function moveEv(di, ei, dir) {
+  const evs = data[di].events;
+  const ni  = ei + dir;
+  if (ni < 0 || ni >= evs.length) return;
+  [evs[ei], evs[ni]] = [evs[ni], evs[ei]];
+  reRenderDay(di);
+}
+
+function delEv(di, ei) {
+  const name = data[di].events[ei].name;
+  if (!confirm(`Delete "${name}"?`)) return;
+  data[di].events.splice(ei, 1);
+  reRenderDay(di); toast('🗑 Event deleted');
+}
+
+function addEvent(di) {
+  const day  = data[di];
+  const nEl  = document.getElementById('an-' + day.id);
+  const tEl  = document.getElementById('at-' + day.id);
+  const tpEl = document.getElementById('atp-' + day.id);
+  const name = nEl.value.trim();
+  if (!name) { nEl.focus(); return; }
+  day.events.push({
+    id:    uid(),
+    time:  tEl.value.trim(),
+    type:  tpEl.value,
+    name,
+    notes: '',
+    alert: ''
+  });
+  nEl.value = ''; tEl.value = '';
+  reRenderDay(di); toast('✅ Event added & saved');
+}
+
+// ─── DAY OPERATIONS ───────────────────────────────────────────────────────────
+function delDay(di) {
+  const day = data[di];
+  if (!confirm(`Delete "${day.title}" and all ${day.events.length} events?`)) return;
+  data.splice(di, 1);
+  render(); scheduleSave(); toast('🗑 Day deleted');
+}
+
+function openAddDay() {
+  showModal(`
+    <h2>➕ Add New Day</h2>
+    <div class="fg-row">
+      <div class="fg"><label>Label</label><input id="m-lbl" value="Day ${data.length+1}"></div>
+      <div class="fg"><label>Date</label><input id="m-date" placeholder="Mon, May 25"></div>
+    </div>
+    <div class="fg"><label>Title</label><input id="m-title" placeholder="e.g. Beach Day"></div>
+    <div class="fg"><label>Subtitle</label><input id="m-sub" placeholder="e.g. Morning hike · Sunset dinner"></div>
+    <div class="m-acts">
+      <button class="m-cancel" onclick="closeModal()">Cancel</button>
+      <button class="m-ok" onclick="confirmAdd()">Add Day</button>
+    </div>`);
+}
+function confirmAdd() {
+  const lbl   = document.getElementById('m-lbl').value.trim();
+  const date  = document.getElementById('m-date').value.trim();
+  const title = document.getElementById('m-title').value.trim() || 'New Day';
+  const sub   = document.getElementById('m-sub').value.trim();
+  if (!lbl) { document.getElementById('m-lbl').focus(); return; }
+  data.push({ id: uid(), date, label:lbl, title, subtitle:sub, events:[] });
+  closeModal(); render(); scheduleSave(); toast('📅 Day added & saved');
+}
+
+function openEditDay(di) {
+  const d = data[di];
+  showModal(`
+    <h2>✏️ Edit Day</h2>
+    <div class="fg-row">
+      <div class="fg"><label>Label</label><input id="m-lbl" value="${escA(d.label)}"></div>
+      <div class="fg"><label>Date</label><input id="m-date" value="${escA(d.date)}"></div>
+    </div>
+    <div class="fg"><label>Title</label><input id="m-title" value="${escA(d.title)}"></div>
+    <div class="fg"><label>Subtitle</label><input id="m-sub" value="${escA(d.subtitle)}"></div>
+    <div class="m-acts">
+      <button class="m-cancel" onclick="closeModal()">Cancel</button>
+      <button class="m-ok" onclick="confirmEdit(${di})">Save</button>
+    </div>`);
+}
+function confirmEdit(di) {
+  data[di].label    = document.getElementById('m-lbl').value.trim();
+  data[di].date     = document.getElementById('m-date').value.trim();
+  data[di].title    = document.getElementById('m-title').value.trim();
+  data[di].subtitle = document.getElementById('m-sub').value.trim();
+  closeModal(); render(); scheduleSave(); toast('✅ Day updated & saved');
+}
+
+// ─── DRAG & DROP ──────────────────────────────────────────────────────────────
+function bindDrag() {
+  document.querySelectorAll('.ev').forEach(el => {
+    el.addEventListener('dragstart', e => {
+      dragDi = +el.dataset.di; dragEi = +el.dataset.ei;
+      el.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      document.querySelectorAll('.ev').forEach(x => x.classList.remove('drag-over'));
+    });
+    el.addEventListener('dragover', e => {
+      e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+      document.querySelectorAll('.ev').forEach(x => x.classList.remove('drag-over'));
+      el.classList.add('drag-over');
+    });
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      const tDi = +el.dataset.di, tEi = +el.dataset.ei;
+      if (dragDi === tDi && dragEi !== tEi) {
+        const evs = data[dragDi].events;
+        const [moved] = evs.splice(dragEi, 1);
+        evs.splice(tEi, 0, moved);
+        reRenderDay(dragDi); toast('↕️ Reordered & saved');
+      }
+    });
+  });
+}
+
+// ─── STATS ────────────────────────────────────────────────────────────────────
+function updateStats() {
+  let evs=0, food=0, acts=0;
+  data.forEach(d => {
+    evs += d.events.length;
+    d.events.forEach(ev => {
+      if (ev.type==='food' || ev.type==='coffee') food++;
+      if (ev.type==='activity') acts++;
+    });
+  });
+  document.getElementById('sDays').textContent = data.length;
+  document.getElementById('sEvs').textContent  = evs;
+  document.getElementById('sFood').textContent = food;
+  document.getElementById('sActs').textContent = acts;
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function showModal(html) {
+  document.getElementById('mBox').innerHTML = html;
+  document.getElementById('overlay').style.display = 'flex';
+  setTimeout(() => { const f = document.querySelector('.modal input'); if(f) f.focus(); }, 60);
+}
+function closeModal() { document.getElementById('overlay').style.display = 'none'; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+let _tt;
+function toast(msg) {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  clearTimeout(_tt);
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  _tt = setTimeout(() => {
+    t.classList.add('out');
+    setTimeout(() => t.remove(), 220);
+  }, 2800);
+}
+
+// ─── EXPORT / IMPORT ─────────────────────────────────────────────────────────
+function doExport() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'costa_rica_itinerary.json';
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('💾 Exported as JSON!');
+}
+function triggerImport() { document.getElementById('fileIn').click(); }
+function handleImport(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const p = JSON.parse(ev.target.result);
+      if (!Array.isArray(p)) throw new Error();
+      data = p; render(); save(); toast('📂 Itinerary imported!');
+    } catch { alert('Invalid file. Export a valid itinerary first.'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ─── RESET ────────────────────────────────────────────────────────────────────
+function resetToDefault() {
+  if (!confirm('Reset to the original default itinerary? All your changes will be lost.')) return;
+  data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  render(); save(); toast('🔄 Reset to default itinerary');
+}
+
+// ─── PRINT ────────────────────────────────────────────────────────────────────
+function doPrint() { expandAll(); setTimeout(() => window.print(), 300); }
+
+// ─── CROSS-TAB SYNC ──────────────────────────────────────────────────────────
+window.addEventListener('storage', e => {
+  if (e.key === LS_KEY && e.newValue) {
+    try {
+      const fresh = JSON.parse(e.newValue);
+      if (Array.isArray(fresh)) { data = fresh; render(); }
+    } catch(err) {}
+  }
+});
+
+// ─── BOOT ─────────────────────────────────────────────────────────────────────
+(function boot() {
+  const loaded = tryLoad();
+  if (!loaded) {
+    // First visit — seed with defaults and persist them
+    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    save();
+  }
+  render();
+})();
+</script>
+</body>
+</html>
