@@ -10,8 +10,6 @@
 :root {--jungle: #1a3a2a; --jungle-mid: #2d5c44; --jungle-lt: #3d7a5a; --palm: #4a9e6e; --leaf: #72c495; --sand: #f5ede0; --sand-d: #e8d9c5; --warm: #f4b96a; --cream: #fdf8f2; --txt: #1a2218; --txt-mid: #3d5246; --txt-lt: #7a9a85; --danger: #c0392b; --warn: #e67e22; --shadow: 0 2px 16px rgba(26,58,42,.09); --shadow-lg: 0 8px 40px rgba(26,58,42,.16);}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);min-height:100vh}
-#syncStatus{position:fixed;bottom:20px;left:20px;background:#fff;border-radius:8px;padding:8px 12px;font-size:.7rem;color:var(--txt-mid);box-shadow:var(--shadow);display:flex;align-items:center;gap:6px;z-index:400}
-#syncDot{width:6px;height:6px;border-radius:50%;background:var(--palm)}
 #saveBadge{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--jungle);color:#fff;font-size:.68rem;font-weight:600;padding:5px 14px;border-radius:20px;opacity:0;transition:opacity .3s;z-index:9999}
 #saveBadge.on{opacity:1}
 .hdr{background:var(--jungle);color:#fff;padding:20px 34px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 24px rgba(0,0,0,.28)}
@@ -100,22 +98,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);m
 .m-cancel{background:var(--sand);color:var(--txt-mid);padding:9px 16px;border-radius:8px;border:none;font-size:.84rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
 .m-cancel:hover{background:var(--sand-d)}
 .toast{position:fixed;bottom:24px;right:24px;background:var(--jungle);color:#fff;padding:10px 16px;border-radius:9px;font-size:.8rem;font-weight:500;z-index:500;box-shadow:0 6px 28px rgba(0,0,0,.2);display:flex;align-items:center;gap:7px}
-@media print{.hdr-btns,.day-hr .btn,.ev-acts,.add-row,.add-day-wrap,.overlay,.toast,.reset-bar,#saveBadge,#syncStatus{display:none!important}}
+@media print{.hdr-btns,.day-hr .btn,.ev-acts,.add-row,.add-day-wrap,.overlay,.toast,.reset-bar,#saveBadge{display:none!important}}
 </style>
 </head>
 <body>
-
-<div id="syncStatus">
-  <div id="syncDot"></div>
-  <span id="syncText">Ready</span>
-</div>
 
 <div id="saveBadge">✓ Saved</div>
 
 <header class="hdr">
   <div class="hdr-brand">
     <h1>🌴 <em>Costa Rica</em> — Pura Vida</h1>
-    <p>May 17–24, 2026 · Eric & Helen · Real-time sync</p>
+    <p>May 16–24, 2026 · Eric & Helen</p>
   </div>
   <div class="hdr-btns">
     <button class="btn btn-ghost" onclick="expandAll()">⬇ Expand</button>
@@ -128,11 +121,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);m
 
 <div class="flights">
   <div class="fl">
-    <div><strong>NK335 · FLL → SJO</strong><span>May 17 · 10:55 AM → 11:45 AM</span></div>
+    <div><strong>AV605 · MIA → SJO</strong><span>May 16 · 2:15 PM → 3:05 PM (next day)</span></div>
   </div>
   <div style="width:1px;height:26px;background:rgba(255,255,255,.18)"></div>
   <div class="fl">
-    <div><strong>NK338 · SJO → FLL</strong><span>May 24 · 1:00 PM → 6:10 PM</span></div>
+    <div><strong>AV604 · SJO → MIA</strong><span>May 24 · 7:45 AM → 12:40 PM</span></div>
   </div>
 </div>
 
@@ -155,7 +148,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);m
 
   <div class="reset-bar">
     <div>
-      <strong>Reset Itinerary</strong>
+      <strong>Reset to Defaults</strong>
       <p>Restore original schedule.</p>
     </div>
     <button class="btn btn-danger btn-sm" onclick="resetToDefault()">🔄 Reset</button>
@@ -166,156 +159,95 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);m
   <div class="modal" id="mBox"></div>
 </div>
 
-<input type="file" id="fileIn" accept=".json" style="display:none" onchange="handleImport(event)">
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-const SUPABASE_URL = 'https://ieazlxhtmbyznqwozwhj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllYXpseGh0bWJ5em5xd296d2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NjIzNDAsImV4cCI6MjA5NDAzODM0MH0._9U3Ix4n2SFN5SHW68jM96eKP6RnKQvL5bPNS7HtDEM';
-const ITINERARY_ID = 'costa-rica-may-2026';
-
-let supabase = null;
-let data = [];
-let isLocalChange = false;
-
 const TYPE_ORDER = ['activity','food','coffee','hotel','transport','flight','note'];
 const TYPE_INFO = {
   hotel: {label:'Hotel', emoji:'🏨', cls:'b-hotel'},
   food: {label:'Restaurant', emoji:'🍽', cls:'b-food'},
-  activity: {label:'Activity', emoji:'🏃', cls:'b-activity'},
+  activity: {label:'Activity', emoji:'🎯', cls:'b-activity'},
   transport: {label:'Transport', emoji:'🚗', cls:'b-transport'},
   flight: {label:'Flight', emoji:'✈️', cls:'b-flight'},
   coffee: {label:'Café', emoji:'☕', cls:'b-coffee'},
 };
 
 const DEFAULT_DATA = [
-  {id:'d1',date:'Sun, May 17',label:'Day 1',title:'Arrival · La Fortuna',subtitle:'Pick up car · Drive north',events:[
-    {id:'e1', time:'10:55 AM',type:'flight', name:'NK335 departs FLL', notes:'Arrives SJO 11:45 AM',alert:''},
-    {id:'e2', time:'12:30 PM',type:'transport', name:'Pick up rental car (SJO Airport)', notes:'May 17–24. SAN JOSE AIRPORT STATION',alert:''},
-    {id:'e3', time:'1:30 PM',type:'transport', name:'Drive to La Fortuna (~2.5 hrs)', notes:'',alert:''},
-    {id:'e4', time:'4:30 PM',type:'activity', name:'La Fortuna Waterfall', notes:'Alajuela Province. 585 steps!',alert:'Closes 5 PM'},
-    {id:'e5', time:'6:30 PM',type:'hotel', name:'Check in: La Fortuna The Hut', notes:'Provincia de Alajuela',alert:''},
-    {id:'e6', time:'7:30 PM',type:'food', name:'Dinner in La Fortuna', notes:'Local restaurant',alert:''},
+  {id:'d1',date:'Fri, May 16',label:'Day 1',title:'Flight Day',subtitle:'Miami → San José',events:[
+    {id:'e1', time:'2:15 PM',type:'flight', name:'AV605 Departs Miami', notes:'Avianca · Arrives 3:05 PM (next day)',alert:''},
   ]},
-  {id:'d2',date:'Mon, May 18',label:'Day 2',title:'Coffee & Volcano',subtitle:'Arenal National Park',events:[
-    {id:'e7', time:'8:00 AM',type:'coffee', name:'Brunch: The Village Coffee Shop', notes:'La Fortuna',alert:''},
-    {id:'e8', time:'10:00 AM',type:'activity', name:'Arenal Volcano National Park', notes:'2km from Lake Arenal',alert:''},
-    {id:'e9', time:'3:00 PM',type:'coffee', name:'Coffee: Vita Café', notes:'Best coffee in Costa Rica',alert:''},
-    {id:'e10',time:'7:00 PM',type:'food', name:'Dinner: Soda & Restaurante Rodríguez', notes:'Treehouse restaurant',alert:''},
+  {id:'d2',date:'Sat, May 17',label:'Day 2',title:'Arrive & Drive',subtitle:'Car rental & La Fortuna',events:[
+    {id:'e2', time:'12:30 PM',type:'transport', name:'Pick up car at SJO Airport', notes:'May 17–24 rental period',alert:''},
+    {id:'e3', time:'2:30 PM',type:'transport', name:'Drive to La Fortuna', notes:'~2.5 hours north',alert:''},
+    {id:'e4', time:'4:30 PM',type:'activity', name:'La Fortuna Waterfall', notes:'Alajuela Province, San Carlos · 585 steps',alert:''},
+    {id:'e5', time:'5:30 PM',type:'hotel', name:'Check in: La Fortuna The Hut', notes:'Provincia de Alajuela',alert:''},
+    {id:'e6', time:'7:00 PM',type:'food', name:'Dinner', notes:'Local restaurant',alert:''},
   ]},
-  {id:'d3',date:'Tue, May 19',label:'Day 3',title:'Drive to Manuel Antonio',subtitle:'Long drive day',events:[
-    {id:'e12',time:'8:00 AM',type:'hotel', name:'Checkout: La Fortuna The Hut', notes:'',alert:''},
-    {id:'e13',time:'8:30 AM',type:'transport', name:'Drive to Quepos (~4 hrs)', notes:'Beautiful coastal route',alert:''},
-    {id:'e15',time:'2:30 PM',type:'hotel', name:'Check in: Shana by the Beach', notes:'Manuel Antonio',alert:''},
+  {id:'d3',date:'Sun, May 18',label:'Day 3',title:'Coffee & Volcano',subtitle:'Arenal National Park',events:[
+    {id:'e7', time:'9:00 AM',type:'coffee', name:'Brunch: The Village Coffee Shop', notes:'La Fortuna',alert:''},
+    {id:'e8', time:'11:00 AM',type:'activity', name:'Arenal Volcano National Park', notes:'2km este de la represa del Lago Arenal, Provincia de Alajuela',alert:''},
+    {id:'e9', time:'3:00 PM',type:'coffee', name:'Coffee: Vita Café', notes:'Frente al Parqueo de la catarata Río, La Fortuna',alert:''},
+    {id:'e10',time:'7:00 PM',type:'food', name:'Dinner: Soda & Restaurante Rodríguez', notes:'Calle 468 Sinai Neighborhood, 300m north of Central Park',alert:''},
+  ]},
+  {id:'d4',date:'Mon, May 19',label:'Day 4',title:'Drive to Manuel Antonio',subtitle:'Long drive day',events:[
+    {id:'e11',time:'9:00 AM',type:'hotel', name:'Checkout: La Fortuna The Hut', notes:'',alert:''},
+    {id:'e12',time:'9:30 AM',type:'transport', name:'Drive to Quepos', notes:'~4 hours, beautiful coastal route',alert:''},
+    {id:'e13',time:'3:00 PM',type:'hotel', name:'Check in: Shana by the Beach', notes:'800 mts noroeste de Plaza Vista, Manuel Antonio',alert:''},
+    {id:'e14',time:'7:00 PM',type:'food', name:'Dinner', notes:'Quepos area',alert:''},
+  ]},
+  {id:'d5',date:'Tue, May 20',label:'Day 5',title:'Manuel Antonio Day 2',subtitle:'Activities & exploration',events:[
+    {id:'e15',time:'9:00 AM',type:'food', name:'Brunch: El Avión', notes:'Puntarenas Province, Aguirre · WWII cargo plane restaurant',alert:''},
+    {id:'e16',time:'11:00 AM',type:'activity', name:'Activity', notes:'Add your plans',alert:''},
     {id:'e17',time:'7:00 PM',type:'food', name:'Dinner', notes:'Quepos area',alert:''},
   ]},
-  {id:'d4',date:'Wed, May 20',label:'Day 4',title:'Manuel Antonio Day 2',subtitle:'Activities & exploration',events:[
-    {id:'e19',time:'9:00 AM',type:'food', name:'Brunch: El Avión', notes:'WWII cargo plane restaurant',alert:''},
-    {id:'e20',time:'11:00 AM',type:'activity', name:'Activity', notes:'Add your own',alert:''},
-    {id:'e22',time:'7:00 PM',type:'food', name:'Dinner', notes:'Quepos area',alert:''},
+  {id:'d6',date:'Wed, May 21',label:'Day 6',title:'Manuel Antonio Day 3',subtitle:'Beach & adventure',events:[
+    {id:'e18',time:'9:00 AM',type:'activity', name:'Activity', notes:'Add your plans',alert:''},
+    {id:'e19',time:'7:00 PM',type:'food', name:'Dinner', notes:'Quepos area',alert:''},
   ]},
-  {id:'d5',date:'Thu, May 21',label:'Day 5',title:'Manuel Antonio Day 3',subtitle:'Adventure day',events:[
-    {id:'e23',time:'8:00 AM',type:'activity', name:'Activity', notes:'Add your own',alert:''},
-    {id:'e27',time:'7:00 PM',type:'food', name:'Dinner', notes:'Quepos area',alert:''},
+  {id:'d7',date:'Thu, May 22',label:'Day 7',title:'Drive to San José',subtitle:'Mountain drive',events:[
+    {id:'e20',time:'9:00 AM',type:'food', name:'Brunch', notes:'Manuel Antonio',alert:''},
+    {id:'e21',time:'10:30 AM',type:'hotel', name:'Checkout: Shana by the Beach', notes:'',alert:''},
+    {id:'e22',time:'11:00 AM',type:'transport', name:'Drive to San José', notes:'~3 hours',alert:''},
+    {id:'e23',time:'3:00 PM',type:'hotel', name:'Check in: Hotel in San José', notes:'',alert:''},
+    {id:'e24',time:'7:00 PM',type:'food', name:'Dinner', notes:'San José',alert:''},
   ]},
-  {id:'d6',date:'Fri, May 22',label:'Day 6',title:'Drive to San José',subtitle:'Mountain drive',events:[
-    {id:'e28',time:'9:00 AM',type:'food', name:'Brunch', notes:'Manuel Antonio',alert:''},
-    {id:'e29',time:'10:30 AM',type:'hotel', name:'Checkout: Shana by the Beach', notes:'',alert:''},
-    {id:'e30',time:'11:00 AM',type:'transport', name:'Drive to San José (~3 hrs)', notes:'',alert:''},
-    {id:'e31',time:'2:30 PM',type:'hotel', name:'Check in: Hotel in San José', notes:'',alert:''},
-    {id:'e33',time:'7:00 PM',type:'food', name:'Dinner', notes:'San José',alert:''},
+  {id:'d8',date:'Fri, May 23',label:'Day 8',title:'San José Culture',subtitle:'Museums & city',events:[
+    {id:'e25',time:'9:00 AM',type:'food', name:'Breakfast', notes:'',alert:''},
+    {id:'e26',time:'11:00 AM',type:'activity', name:'Activity', notes:'Museum or sightseeing',alert:''},
+    {id:'e27',time:'7:30 PM',type:'food', name:'Farewell Dinner', notes:'Celebrate! 🎉',alert:''},
   ]},
-  {id:'d7',date:'Sat, May 23',label:'Day 7',title:'San José Culture',subtitle:'Museums & city',events:[
-    {id:'e34',time:'9:00 AM',type:'food', name:'Breakfast', notes:'',alert:''},
-    {id:'e35',time:'11:00 AM',type:'activity', name:'Activity', notes:'Add your own',alert:''},
-    {id:'e38',time:'7:30 PM',type:'food', name:'Farewell Dinner', notes:'Celebrate! 🎉',alert:''},
-  ]},
-  {id:'d8',date:'Sun, May 24',label:'Day 8',title:'Fly Home',subtitle:'San José → FLL',events:[
-    {id:'e39',time:'8:00 AM',type:'food', name:'Breakfast', notes:'',alert:''},
-    {id:'e40',time:'9:30 AM',type:'transport', name:'Return rental car', notes:'10:00 AM at SJO Airport',alert:''},
-    {id:'e41',time:'10:00 AM',type:'transport', name:'Airport check-in', notes:'',alert:''},
-    {id:'e42',time:'1:00 PM',type:'flight', name:'NK338 departs SJO', notes:'Arrives FFL 6:10 PM. Pura Vida! 🌴',alert:''},
+  {id:'d9',date:'Sat, May 24',label:'Day 9',title:'Fly Home',subtitle:'San José → Miami',events:[
+    {id:'e28',time:'7:00 AM',type:'food', name:'Breakfast', notes:'',alert:''},
+    {id:'e29',time:'9:00 AM',type:'transport', name:'Return rental car', notes:'10:00 AM at SJO Airport',alert:''},
+    {id:'e30',time:'10:00 AM',type:'transport', name:'Airport check-in', notes:'',alert:''},
+    {id:'e31',time:'7:45 AM',type:'flight', name:'AV604 Departs SJO', notes:'Avianca · Arrives Miami 12:40 PM',alert:''},
   ]},
 ];
 
-function initSupabase() {
-  try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    return true;
-  } catch(e) {
-    console.warn('Supabase init failed');
-    return false;
-  }
-}
+let data = [];
 
-function setSyncStatus(msg) {
-  const txt = document.getElementById('syncText');
-  if (txt) txt.textContent = msg;
-}
-
-async function loadFromSupabase() {
-  if (!supabase) return null;
+function loadData() {
   try {
-    const { data: rows } = await supabase
-      .from('cr_itineraries')
-      .select('data')
-      .eq('id', ITINERARY_ID)
-      .single();
-    
-    if (rows && rows.data && Array.isArray(rows.data)) {
-      return rows.data;
-    }
-  } catch (e) {
-    console.warn('Supabase load failed');
-  }
-  return null;
-}
-
-function loadLocal() {
-  try {
-    const raw = localStorage.getItem('cr_itinerary_v3');
-    if (raw) {
-      const p = JSON.parse(raw);
-      if (Array.isArray(p)) return p;
+    const raw = localStorage.getItem('cr_itinerary');
+    if (raw && raw.length > 10) {
+      data = JSON.parse(raw);
+      return true;
     }
   } catch(e) {}
-  return null;
+  return false;
 }
 
-async function save() {
-  localStorage.setItem('cr_itinerary_v3', JSON.stringify(data));
-  
-  if (supabase) {
-    setSyncStatus('Saving...');
-    try {
-      await supabase.from('cr_itineraries').upsert({
-        id: ITINERARY_ID,
-        data: data,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' });
-      
-      const el = document.getElementById('saveBadge');
-      el.classList.add('on');
-      setTimeout(() => el.classList.remove('on'), 1400);
-      setSyncStatus('Synced');
-    } catch(e) {
-      console.warn('Save failed');
-      setSyncStatus('Saved locally');
-    }
-  }
-}
-
-let saveTimeout;
-function scheduleSave() {
-  clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(save, 500);
+function save() {
+  localStorage.setItem('cr_itinerary', JSON.stringify(data));
+  const el = document.getElementById('saveBadge');
+  el.classList.add('on');
+  setTimeout(() => el.classList.remove('on'), 1400);
 }
 
 function esc(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
 function escA(s) { return String(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
 function uid() { return '_' + Date.now() + Math.random().toString(36).slice(2,6); }
 
 function render() {
@@ -402,8 +334,7 @@ function reRenderDay(di) {
   if (closed) card.classList.add('closed');
   wireAddRow(day.id, di);
   updateStats();
-  isLocalChange = true;
-  scheduleSave();
+  save();
 }
 
 function wireAddRow(dayId, di) {
@@ -493,8 +424,7 @@ function delDay(di) {
   if (!confirm('Delete day?')) return;
   data.splice(di, 1);
   render(); 
-  isLocalChange = true; 
-  scheduleSave();
+  save();
 }
 
 function openAddDay() {
@@ -517,8 +447,7 @@ function confirmAdd() {
   data.push({ id: uid(), date, label: lbl, title, subtitle: '', events: [] });
   closeModal(); 
   render(); 
-  isLocalChange = true; 
-  scheduleSave();
+  save();
 }
 
 function openEditDay(di) {
@@ -540,8 +469,7 @@ function confirmEdit(di) {
   data[di].title = document.getElementById('m-title').value.trim();
   closeModal(); 
   render(); 
-  isLocalChange = true; 
-  scheduleSave();
+  save();
 }
 
 function updateStats() {
@@ -577,41 +505,16 @@ function doExport() {
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'itinerary.json';
+  a.download = 'costa-rica-itinerary.json';
   a.click();
   URL.revokeObjectURL(a.href);
 }
 
-function triggerImport() {
-  document.getElementById('fileIn').click();
-}
-
-function handleImport(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      const p = JSON.parse(ev.target.result);
-      if (!Array.isArray(p)) throw new Error();
-      data = p;
-      render();
-      isLocalChange = true;
-      save();
-    } catch {
-      alert('Invalid file');
-    }
-  };
-  reader.readAsText(file);
-  e.target.value = '';
-}
-
 function resetToDefault() {
-  if (!confirm('Reset to default?')) return;
+  if (!confirm('Reset to default itinerary?')) return;
   data = JSON.parse(JSON.stringify(DEFAULT_DATA));
   render();
-  isLocalChange = true;
-  scheduleSave();
+  save();
 }
 
 function doPrint() {
@@ -619,30 +522,11 @@ function doPrint() {
   setTimeout(() => window.print(), 300);
 }
 
-async function init() {
-  // Load from Supabase first
-  const sbData = await loadFromSupabase();
-  if (sbData) {
-    data = sbData;
-    setSyncStatus('Loaded from cloud');
-  } else {
-    // Fall back to localStorage
-    const lsData = loadLocal();
-    if (lsData) {
-      data = lsData;
-      setSyncStatus('Loaded from device');
-    } else {
-      // Use defaults
-      data = JSON.parse(JSON.stringify(DEFAULT_DATA));
-      setSyncStatus('Ready');
-    }
+function init() {
+  if (!loadData()) {
+    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
   }
-  
   render();
-  
-  // Initialize Supabase for future saves
-  initSupabase();
-  save();
 }
 
 init();
