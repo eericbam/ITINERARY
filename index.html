@@ -27,6 +27,21 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);min-height:100vh;-webkit-font-smoothing:antialiased}
 
+/* SYNC STATUS */
+#syncStatus{
+  position:fixed;bottom:20px;left:20px;
+  background:#fff;border-radius:8px;padding:8px 12px;
+  font-size:.7rem;color:var(--txt-mid);
+  box-shadow:var(--shadow);display:flex;align-items:center;gap:6px;
+  z-index:400;border:1px solid var(--sand-d);
+}
+#syncDot{
+  width:6px;height:6px;border-radius:50%;background:var(--txt-lt);
+  animation:pulse 2s infinite;
+}
+#syncDot.synced{background:var(--palm);animation:none}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+
 /* SAVE FLASH */
 #saveBadge{
   position:fixed;top:14px;left:50%;transform:translateX(-50%);
@@ -293,7 +308,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);m
 
 /* PRINT */
 @media print{
-  .hdr-btns,.day-hr .btn,.ev-acts,.add-row,.add-day-wrap,.overlay,.toast,.reset-bar,#saveBadge{display:none!important}
+  .hdr-btns,.day-hr .btn,.ev-acts,.add-row,.add-day-wrap,.overlay,.toast,.reset-bar,#saveBadge,#syncStatus{display:none!important}
   .day.closed .day-body{display:block!important}
   body{background:#fff}
 }
@@ -306,17 +321,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);m
   .day-hdr{padding:11px 13px}
   .day-body{padding:0 11px 9px}
   .stats{gap:12px}
+  #syncStatus{bottom:60px;font-size:.65rem}
 }
 </style>
 </head>
 <body>
 
-<div id="saveBadge">✓ Saved to browser</div>
+<div id="syncStatus">
+  <div id="syncDot"></div>
+  <span id="syncText">Syncing...</span>
+</div>
+
+<div id="saveBadge">✓ Synced to Supabase</div>
 
 <header class="hdr">
   <div class="hdr-brand">
     <h1>🌴 <em>Costa Rica</em> — Pura Vida</h1>
-    <p>May 17–24, 2026 · Eric &amp; Helen · All changes auto-saved locally</p>
+    <p>May 17–24, 2026 · Eric &amp; Helen · Real-time sync</p>
   </div>
   <div class="hdr-btns">
     <button class="btn btn-ghost" onclick="expandAll()">⬇ Expand</button>
@@ -374,7 +395,44 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--txt);m
 
 <input type="file" id="fileIn" accept=".json" style="display:none" onchange="handleImport(event)">
 
+<!-- Supabase JS Client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
+
+// ✅ CONFIGURED FOR ERIC & HELEN
+const SUPABASE_URL = 'https://ieazlxhtmbyznqwozwhj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImllYXpseGh0bWJ5em5xd296d2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0NjIzNDAsImV4cCI6MjA5NDAzODM0MH0._9U3Ix4n2SFN5SHW68jM96eKP6RnKQvL5bPNS7HtDEM';
+const ITINERARY_ID = 'costa-rica-may-2026';
+
+let supabase = null;
+let subscription = null;
+let isSyncing = true;
+let isLocalChange = false;
+
+// Initialize Supabase
+function initSupabase() {
+  if (!SUPABASE_URL || SUPABASE_URL.includes('YOUR_')) {
+    console.warn('⚠️ Supabase not configured. Using localStorage fallback.');
+    return false;
+  }
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return true;
+}
+
+function setSyncStatus(syncing, msg) {
+  isSyncing = syncing;
+  const dot = document.getElementById('syncDot');
+  const txt = document.getElementById('syncText');
+  if (syncing) {
+    dot.classList.remove('synced');
+    txt.textContent = msg || 'Syncing...';
+  } else {
+    dot.classList.add('synced');
+    txt.textContent = msg || 'Synced';
+  }
+}
+
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 const LS_KEY = 'cr_itinerary_v3';
 
@@ -457,32 +515,112 @@ let saveTimeout = null;
 let dragDi = null, dragEi = null;
 
 // ─── PERSISTENCE ─────────────────────────────────────────────────────────────
-function tryLoad() {
+async function tryLoadFromSupabase() {
+  if (!supabase) return false;
+  try {
+    setSyncStatus(true, 'Loading from Supabase...');
+    const { data: rows, error } = await supabase
+      .from('cr_itineraries')
+      .select('data')
+      .eq('id', ITINERARY_ID)
+      .single();
+    
+    if (error && error.code !== 'PGRST116') {
+      console.error('Supabase error:', error);
+      return false;
+    }
+    
+    if (rows && rows.data) {
+      const p = rows.data;
+      if (Array.isArray(p) && p.length) {
+        data = p;
+        setSyncStatus(false, 'Loaded from cloud');
+        return true;
+      }
+    }
+  } catch (e) {
+    console.error('Error loading from Supabase:', e);
+  }
+  return false;
+}
+
+function tryLoadLocal() {
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (raw) {
       const p = JSON.parse(raw);
-      if (Array.isArray(p) && p.length) { data = p; return true; }
+      if (Array.isArray(p) && p.length) { 
+        data = p;
+        return true;
+      }
     }
   } catch(e) {}
   return false;
 }
 
-function save() {
+async function save() {
   try {
+    // Always save to localStorage as backup
     localStorage.setItem(LS_KEY, JSON.stringify(data));
-    const el = document.getElementById('saveBadge');
-    el.classList.add('on');
-    clearTimeout(el._t);
-    el._t = setTimeout(() => el.classList.remove('on'), 1600);
+    
+    // Save to Supabase if available
+    if (supabase) {
+      setSyncStatus(true, 'Saving...');
+      const { error } = await supabase
+        .from('cr_itineraries')
+        .upsert({
+          id: ITINERARY_ID,
+          data: data,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+      
+      if (error) {
+        console.error('Supabase save error:', error);
+        setSyncStatus(false, 'Local saved only');
+        toast('⚠️ Saved locally (check Supabase config)');
+      } else {
+        const el = document.getElementById('saveBadge');
+        el.classList.add('on');
+        clearTimeout(el._t);
+        el._t = setTimeout(() => el.classList.remove('on'), 1400);
+        setSyncStatus(false, 'Synced');
+      }
+    } else {
+      const el = document.getElementById('saveBadge');
+      el.classList.add('on');
+      clearTimeout(el._t);
+      el._t = setTimeout(() => el.classList.remove('on'), 1400);
+    }
   } catch(e) {
-    if (e.name === 'QuotaExceededError') toast('⚠️ Browser storage full — try Export first');
+    console.error('Save error:', e);
+    if (e.name === 'QuotaExceededError') toast('⚠️ Browser storage full');
   }
 }
 
 function scheduleSave() {
   clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(save, 350);
+  saveTimeout = setTimeout(save, 500);
+}
+
+function setupRealtimeListener() {
+  if (!supabase) return;
+  
+  subscription = supabase
+    .channel('cr_itinerary_changes')
+    .on('postgres_changes', 
+      { event: '*', schema: 'public', table: 'cr_itineraries', filter: `id=eq.${ITINERARY_ID}` },
+      (payload) => {
+        if (!isLocalChange && payload.new && payload.new.data) {
+          console.log('Remote update received');
+          data = payload.new.data;
+          render();
+          setSyncStatus(false, 'Synced');
+          toast('🔄 Updated from Helen');
+        }
+        isLocalChange = false;
+      }
+    )
+    .subscribe();
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
@@ -586,6 +724,7 @@ function reRenderDay(di) {
   wireAddRow(day.id, di);
   updateStats();
   bindDrag();
+  isLocalChange = true;
   scheduleSave();
 }
 
@@ -695,7 +834,7 @@ function delDay(di) {
   const day = data[di];
   if (!confirm(`Delete "${day.title}" and all ${day.events.length} events?`)) return;
   data.splice(di, 1);
-  render(); scheduleSave(); toast('🗑 Day deleted');
+  render(); isLocalChange = true; scheduleSave(); toast('🗑 Day deleted');
 }
 
 function openAddDay() {
@@ -719,7 +858,7 @@ function confirmAdd() {
   const sub   = document.getElementById('m-sub').value.trim();
   if (!lbl) { document.getElementById('m-lbl').focus(); return; }
   data.push({ id: uid(), date, label:lbl, title, subtitle:sub, events:[] });
-  closeModal(); render(); scheduleSave(); toast('📅 Day added & saved');
+  closeModal(); render(); isLocalChange = true; scheduleSave(); toast('📅 Day added & saved');
 }
 
 function openEditDay(di) {
@@ -742,7 +881,7 @@ function confirmEdit(di) {
   data[di].date     = document.getElementById('m-date').value.trim();
   data[di].title    = document.getElementById('m-title').value.trim();
   data[di].subtitle = document.getElementById('m-sub').value.trim();
-  closeModal(); render(); scheduleSave(); toast('✅ Day updated & saved');
+  closeModal(); render(); isLocalChange = true; scheduleSave(); toast('✅ Day updated & saved');
 }
 
 // ─── DRAG & DROP ──────────────────────────────────────────────────────────────
@@ -831,7 +970,7 @@ function handleImport(e) {
     try {
       const p = JSON.parse(ev.target.result);
       if (!Array.isArray(p)) throw new Error();
-      data = p; render(); save(); toast('📂 Itinerary imported!');
+      data = p; render(); isLocalChange = true; save(); toast('📂 Itinerary imported!');
     } catch { alert('Invalid file. Export a valid itinerary first.'); }
   };
   reader.readAsText(file);
@@ -842,32 +981,43 @@ function handleImport(e) {
 function resetToDefault() {
   if (!confirm('Reset to the original default itinerary? All your changes will be lost.')) return;
   data = JSON.parse(JSON.stringify(DEFAULT_DATA));
-  render(); save(); toast('🔄 Reset to default itinerary');
+  render(); isLocalChange = true; save(); toast('🔄 Reset to default itinerary');
 }
 
 // ─── PRINT ────────────────────────────────────────────────────────────────────
 function doPrint() { expandAll(); setTimeout(() => window.print(), 300); }
 
-// ─── CROSS-TAB SYNC ──────────────────────────────────────────────────────────
-window.addEventListener('storage', e => {
-  if (e.key === LS_KEY && e.newValue) {
-    try {
-      const fresh = JSON.parse(e.newValue);
-      if (Array.isArray(fresh)) { data = fresh; render(); }
-    } catch(err) {}
-  }
-});
-
 // ─── BOOT ─────────────────────────────────────────────────────────────────────
-(function boot() {
-  const loaded = tryLoad();
-  if (!loaded) {
-    // First visit — seed with defaults and persist them
-    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
-    save();
+async function boot() {
+  const supabaseReady = initSupabase();
+  
+  if (supabaseReady) {
+    const loaded = await tryLoadFromSupabase();
+    if (!loaded) {
+      const localLoaded = tryLoadLocal();
+      if (!localLoaded) {
+        data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        await save();
+      } else {
+        // Sync local to Supabase
+        await save();
+      }
+    }
+    setupRealtimeListener();
+  } else {
+    // Fallback to localStorage only
+    const loaded = tryLoadLocal();
+    if (!loaded) {
+      data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      save();
+    }
+    setSyncStatus(false, 'Offline mode');
   }
+  
   render();
-})();
+}
+
+boot();
 </script>
 </body>
 </html>
